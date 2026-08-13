@@ -1,0 +1,24 @@
+{
+  "name": "ai-job-autofill",
+  "version": "1.0.0",
+  "description": "V1 of AI Job Application Autofill Chrome Extension",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/field-classifier.test.js && node tests/resume-parser.test.js && node tests/value-resolver.test.js && node tests/validator.test.js",
+    "test:integration": "node tests/run-integration-tests.js"
+  },
+  "keywords": [
+    "chrome-extension",
+    "autofill",
+    "job-application",
+    "ai"
+  ],
+  "dependencies": {
+    "pdfjs-dist": "^4.10.38"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

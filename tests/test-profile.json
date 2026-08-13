@@ -1,0 +1,88 @@
+{
+  "personal": {
+    "firstName": "Alex",
+    "middleName": "Morgan",
+    "lastName": "Taylor",
+    "fullName": "Alex Morgan Taylor",
+    "dateOfBirth": "1994-06-15"
+  },
+
+  "contact": {
+    "email": "alex.taylor@example.com",
+    "phone": "+1 (555) 234-5678",
+    "alternatePhone": "+1 (555) 876-5432",
+    "address": "742 Evergreen Terrace",
+    "city": "Austin",
+    "state": "Texas",
+    "country": "United States",
+    "postalCode": "78701"
+  },
+
+  "professional": {
+    "currentTitle": "Senior Full Stack Engineer",
+    "currentCompany": "TechCorp Innovations",
+    "totalExperience": "5.5 years",
+    "noticePeriod": "30 days",
+    "currentSalary": "$120,000",
+    "expectedSalary": "$140,000",
+    "skills": ["JavaScript", "TypeScript", "Python", "React", "Node.js", "AWS", "Docker", "PostgreSQL"]
+  },
+
+  "education": [
+    {
+      "degree": "Bachelor of Science in Computer Science",
+      "fieldOfStudy": "Computer Science",
+      "institution": "University of Texas at Austin",
+      "startYear": "2012",
+      "endYear": "2016",
+      "gpa": "3.8"
+    }
+  ],
+
+  "experience": [
+    {
+      "title": "Senior Full Stack Engineer",
+      "company": "TechCorp Innovations",
+      "location": "Austin, TX",
+      "startDate": "2021-03",
+      "endDate": "Present",
+      "isCurrent": true,
+      "description": "Led development of cloud-native microservices using React, Node.js, and AWS."
+    }
+  ],
+
+  "projects": [
+    {
+      "title": "Cloud Dashboard System",
+      "description": "Architected a real-time monitoring dashboard handling 1M+ daily events using React and WebSockets.",
+      "technologies": ["React", "Node.js", "Redis", "AWS"],
+      "link": "https://github.com/alextaylor/cloud-dashboard"
+    }
+  ],
+
+  "certifications": [
+    {
+      "name": "AWS Certified Solutions Architect",
+      "issuer": "Amazon Web Services",
+      "issueDate": "2022-08"
+    }
+  ],
+
+  "links": {
+    "linkedin": "https://linkedin.com/in/alextaylor-dev",
+    "github": "https://github.com/alextaylor",
+    "portfolio": "https://alextaylor.dev"
+  },
+
+  "preferences": {
+    "preferredLocations": ["Austin, TX", "Remote"],
+    "workMode": "Remote",
+    "preferredRoles": ["Senior Full Stack Engineer", "Lead Developer"]
+  },
+
+  "documents": {
+    "resumeFileName": "Alex_Taylor_Resume.pdf",
+    "rawResumeText": "Alex Morgan Taylor\nSenior Full Stack Engineer\nalex.taylor@example.com | +1 (555) 234-5678 | Austin, TX\nhttps://linkedin.com/in/alextaylor-dev | https://github.com/alextaylor\n\nEXPERIENCE\nSenior Full Stack Engineer at TechCorp Innovations (2021-Present)\nArchitected microservices using React, Node.js, Python, AWS, Docker.\n\nEDUCATION\nBS Computer Science, UT Austin (2012-2016)",
+    "coverLetter": "Dear Hiring Manager,\nI am writing to express my strong interest in the Senior Full Stack Engineer position..."
+  }
+}

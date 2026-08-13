@@ -1,0 +1,16 @@
+{
+  "name": "Generic Job Application Profile",
+  "fields": [
+    { "key": "first_name", "path": "personal.firstName" },
+    { "key": "last_name", "path": "personal.lastName" },
+    { "key": "email", "path": "contact.email" },
+    { "key": "phone", "path": "contact.phone" },
+    { "key": "linkedin", "path": "links.linkedin" },
+    { "key": "github", "path": "links.github" },
+    { "key": "portfolio", "path": "links.portfolio" },
+    { "key": "title", "path": "professional.currentTitle" },
+    { "key": "company", "path": "professional.currentCompany" },
+    { "key": "experience", "path": "professional.totalExperience" },
+    { "key": "skills", "path": "professional.skills" }
+  ]
+}

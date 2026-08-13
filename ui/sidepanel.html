@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Job Autofill</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-title">AI Job Autofill</span>
+      <span class="brand-version">V1</span>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="autofill">Autofill</button>
+    <button class="tab-btn" data-tab="resume">Resume</button>
+    <button class="tab-btn" data-tab="profile">Profile</button>
+    <button class="tab-btn" data-tab="results">Results</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </nav>
+
+  <main id="app-view-container">
+    <!-- Dynamic Component Views render here -->
+  </main>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>
