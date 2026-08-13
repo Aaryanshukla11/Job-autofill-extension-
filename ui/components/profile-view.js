@@ -1,8 +1,22 @@
 /**
- * Minimal & Editorial Profile View Component
+ * Minimal & Editorial Profile View Component with Field Type Selector
  */
 
 import { saveCandidateProfile } from '../../storage/storage.js';
+
+const FIELD_PRESETS = [
+  { label: 'Custom Field', key: '', placeholder: 'Field Value' },
+  { label: 'Job Title', key: 'Job Title', placeholder: 'e.g. Senior Software Engineer' },
+  { label: 'Current Company', key: 'Current Company', placeholder: 'e.g. Google / Acme Corp' },
+  { label: 'Notice Period', key: 'Notice Period', placeholder: 'e.g. 15 days / Immediate' },
+  { label: 'Expected Salary', key: 'Expected Salary', placeholder: 'e.g. $120,000 / annum' },
+  { label: 'Current Salary', key: 'Current Salary', placeholder: 'e.g. $100,000 / annum' },
+  { label: 'Work Authorization / Visa', key: 'Work Authorization', placeholder: 'e.g. Authorized / H1B / Citizen' },
+  { label: 'Middle Name', key: 'Middle Name', placeholder: 'e.g. Alexander' },
+  { label: 'Date of Birth', key: 'Date of Birth', placeholder: 'e.g. YYYY-MM-DD' },
+  { label: 'Postal / Zip Code', key: 'Postal Code', placeholder: 'e.g. 10001' },
+  { label: 'Alternate Phone', key: 'Alternate Phone', placeholder: 'e.g. +1 (555) 987-6543' }
+];
 
 export function renderProfileView(container, { candidateProfile, onProfileUpdated }) {
   const p = candidateProfile.personal || {};
@@ -110,24 +124,14 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
           </div>
         </div>
 
-        <!-- Custom Fields -->
+        <!-- Custom & Extra Fields -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
-          <div class="section-title" style="margin: 0;">Custom Fields</div>
+          <div class="section-title" style="margin: 0;">Custom & Additional Fields</div>
           <button type="button" id="btn-add-custom-field" class="btn-sm-outline">+ Add field</button>
         </div>
 
         <div id="custom-fields-container" style="margin-top: 8px;">
-          ${Object.entries(custom).map(([key, val], idx) => `
-            <div class="form-row custom-field-row" style="align-items: center;" data-custom-idx="${idx}">
-              <div class="form-col" style="flex: 1;">
-                <input type="text" class="custom-key" value="${escapeVal(key)}" placeholder="Field Name" />
-              </div>
-              <div class="form-col" style="flex: 1.5;">
-                <input type="text" class="custom-val" value="${escapeVal(val)}" placeholder="Field Value" />
-              </div>
-              <button type="button" class="btn-del-custom" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 4px; font-size: 13px;">✕</button>
-            </div>
-          `).join('')}
+          ${Object.entries(custom).map(([key, val], idx) => renderCustomFieldRow(key, val, idx)).join('')}
         </div>
 
         <div class="section" style="margin-top: 20px;">
@@ -140,29 +144,17 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
     </div>
   `;
 
-  // Custom Field Handlers
+  // Bind custom field select handlers
   const customContainer = document.getElementById('custom-fields-container');
-  document.getElementById('btn-add-custom-field').addEventListener('click', () => {
-    const row = document.createElement('div');
-    row.className = 'form-row custom-field-row';
-    row.style.cssText = 'align-items: center; margin-bottom: 8px;';
-    row.innerHTML = `
-      <div class="form-col" style="flex: 1;">
-        <input type="text" class="custom-key" placeholder="Field Name" />
-      </div>
-      <div class="form-col" style="flex: 1.5;">
-        <input type="text" class="custom-val" placeholder="Field Value" />
-      </div>
-      <button type="button" class="btn-del-custom" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 4px; font-size: 13px;">✕</button>
-    `;
-    customContainer.appendChild(row);
-    row.querySelector('.btn-del-custom').addEventListener('click', () => row.remove());
-  });
+  bindCustomFieldRows(customContainer);
 
-  customContainer.querySelectorAll('.btn-del-custom').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.target.closest('.custom-field-row').remove();
-    });
+  document.getElementById('btn-add-custom-field').addEventListener('click', () => {
+    const idx = customContainer.querySelectorAll('.custom-field-row').length;
+    const div = document.createElement('div');
+    div.innerHTML = renderCustomFieldRow('', '', idx);
+    const newRow = div.firstElementChild;
+    customContainer.appendChild(newRow);
+    bindCustomRowEvents(newRow);
   });
 
   // Export JSON
@@ -253,6 +245,62 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
       },
       customFields
     };
+  }
+}
+
+function renderCustomFieldRow(key = '', val = '', idx = 0) {
+  const matchedPreset = FIELD_PRESETS.find(p => p.key && p.key.toLowerCase() === key.toLowerCase());
+  const selectedType = matchedPreset ? matchedPreset.key : (key ? 'custom' : '');
+
+  return `
+    <div class="form-row custom-field-row" style="align-items: center; margin-bottom: 8px;" data-custom-idx="${idx}">
+      <div class="form-col" style="flex: 1;">
+        <select class="custom-type-select">
+          ${FIELD_PRESETS.map(p => `
+            <option value="${p.key}" ${p.key === selectedType ? 'selected' : ''}>${p.label}</option>
+          `).join('')}
+        </select>
+      </div>
+      <div class="form-col" style="flex: 1;">
+        <input type="text" class="custom-key" value="${escapeVal(key)}" placeholder="Field Name" />
+      </div>
+      <div class="form-col" style="flex: 1.5;">
+        <input type="text" class="custom-val" value="${escapeVal(val)}" placeholder="${matchedPreset ? matchedPreset.placeholder : 'Field Value'}" />
+      </div>
+      <button type="button" class="btn-del-custom" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 4px; font-size: 13px;">✕</button>
+    </div>
+  `;
+}
+
+function bindCustomFieldRows(container) {
+  container.querySelectorAll('.custom-field-row').forEach(row => bindCustomRowEvents(row));
+}
+
+function bindCustomRowEvents(row) {
+  const typeSelect = row.querySelector('.custom-type-select');
+  const keyInput = row.querySelector('.custom-key');
+  const valInput = row.querySelector('.custom-val');
+  const delBtn = row.querySelector('.btn-del-custom');
+
+  if (typeSelect) {
+    typeSelect.addEventListener('change', () => {
+      const selectedKey = typeSelect.value;
+      const preset = FIELD_PRESETS.find(p => p.key === selectedKey);
+      if (preset && preset.key) {
+        keyInput.value = preset.key;
+        valInput.placeholder = preset.placeholder;
+        valInput.focus();
+      } else {
+        keyInput.value = '';
+        keyInput.placeholder = 'Custom Field Name';
+        valInput.placeholder = 'Field Value';
+        keyInput.focus();
+      }
+    });
+  }
+
+  if (delBtn) {
+    delBtn.addEventListener('click', () => row.remove());
   }
 }
 

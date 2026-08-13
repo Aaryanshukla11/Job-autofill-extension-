@@ -93,6 +93,12 @@ function renderCurrentView() {
         candidateProfile,
         onProfileUpdated: updated => {
           candidateProfile = updated;
+        },
+        onNavigateToProfile: () => {
+          currentTab = 'profile';
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          const profileBtn = document.querySelector('.tab-btn[data-tab="profile"]');
+          if (profileBtn) profileBtn.classList.add('active');
           renderCurrentView();
         }
       });
