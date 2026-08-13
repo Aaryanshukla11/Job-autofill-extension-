@@ -3,6 +3,9 @@
   "name": "AI Job Autofill",
   "version": "1.0.0",
   "description": "AI-powered job application autofill assistant — intelligent form field mapping, answer generation, and validation.",
+    "host_permissions": [
+    "file:///*"
+  ],
   "permissions": [
     "activeTab",
     "scripting",
