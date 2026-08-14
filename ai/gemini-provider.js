@@ -1,14 +1,14 @@
 /**
  * Google Gemini API Provider - Background execution only
- * Primary Model: models/gemini-2.5-flash-lite
+ * Primary Model: models/gemini-3.7-flash
  * Fallback Model: models/gemini-2.0-flash
  *
  * API Docs: https://ai.google.dev/api/generate-content
  */
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
-const PRIMARY_MODEL  = 'models/gemini-2.5-flash-lite';
-const FALLBACK_MODEL = 'models/gemini-2.0-flash';
+const PRIMARY_MODEL  = 'models/gemini-3.7-flash';
+const FALLBACK_MODEL = 'models/gemini-3.7-flash';
 
 export async function callGeminiApi({ apiKey, systemPrompt, userPrompt, model = PRIMARY_MODEL, maxTokens = 1000 }) {
   if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {

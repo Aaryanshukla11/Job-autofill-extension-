@@ -8,14 +8,8 @@ import { exportUserMemoryJSON, importUserMemoryJSON, saveUserMemory } from '../.
 import { createEmptyUserMemory } from '../../memory/memory-schema.js';
 
 export function renderSettingsView(container, { settings, onSettingsUpdated }) {
-  const currentModel = settings.aiModel || 'models/gemini-2.5-flash-lite';
-  const standardModels = [
-    'models/gemini-2.5-flash-lite',
-    'models/gemini-2.0-flash',
-    'models/gemini-2.0-flash-lite',
-    'models/gemini-1.5-flash',
-    'models/gemini-1.5-pro'
-  ];
+  const currentModel = settings.aiModel || 'models/gemini-3.7-flash';
+  const standardModels = ['models/gemini-3.7-flash'];
   const isCustomModel = !standardModels.includes(currentModel);
 
   container.innerHTML = `
@@ -43,11 +37,7 @@ export function renderSettingsView(container, { settings, onSettingsUpdated }) {
           <div class="form-col">
             <label>AI Model</label>
             <select id="s-aiModel">
-              <option value="models/gemini-2.5-flash-lite" ${currentModel === 'models/gemini-2.5-flash-lite' ? 'selected' : ''}>gemini-2.5-flash-lite (Default)</option>
-              <option value="models/gemini-2.0-flash" ${currentModel === 'models/gemini-2.0-flash' ? 'selected' : ''}>gemini-2.0-flash (Fallback)</option>
-              <option value="models/gemini-2.0-flash-lite" ${currentModel === 'models/gemini-2.0-flash-lite' ? 'selected' : ''}>gemini-2.0-flash-lite</option>
-              <option value="models/gemini-1.5-flash" ${currentModel === 'models/gemini-1.5-flash' ? 'selected' : ''}>gemini-1.5-flash</option>
-              <option value="models/gemini-1.5-pro" ${currentModel === 'models/gemini-1.5-pro' ? 'selected' : ''}>gemini-1.5-pro</option>
+              <option value="models/gemini-3.7-flash" ${currentModel === 'models/gemini-3.7-flash' ? 'selected' : ''}>gemini-3.7-flash</option>
               <option value="custom" ${isCustomModel ? 'selected' : ''}>+ Add Custom Model String...</option>
             </select>
           </div>
@@ -201,7 +191,7 @@ export function renderSettingsView(container, { settings, onSettingsUpdated }) {
 
     let chosenModel = modelSelect.value;
     if (chosenModel === 'custom') {
-      chosenModel = customModelInput.value.trim() || 'models/gemini-2.5-flash-lite';
+      chosenModel = customModelInput.value.trim() || 'models/gemini-3.7-flash';
     }
 
     const apiKey = document.getElementById('s-geminiKey').value.trim();

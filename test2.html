@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate HTML5 Form Test Page</title>
+    <title>Job Application Form</title>
     <style>
         body { font-family: sans-serif; line-height: 1.6; margin: 20px; max-width: 800px; }
         fieldset { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
@@ -21,220 +21,233 @@
 </head>
 <body>
 
-    <h1>Ultimate HTML5 Form Fields Test Page</h1>
-    <p>Use this comprehensive form to test your browser behaviors, automation configurations, or CSS styling templates.</p>
+    <h1>Job Application Form</h1>
+    <p>Please fill out the details below to submit your application for the open position.</p>
 
     <form action="#" method="POST" enctype="multipart/form-data">
         
-        <!-- Text & Core Inputs -->
+        <!-- Applicant Identity & Account -->
         <fieldset>
-            <legend>Standard Text & Core Inputs</legend>
+            <legend>Personal & Account Information</legend>
             
             <div class="form-group">
-                <label for="text-field">Standard Text Input (<code style="color:red;">type="text"</code>):</label>
-                <input type="text" id="text-field" name="text-field" placeholder="Enter standard text..." required maxlength="50">
+                <label for="full-name">Full Legal Name:</label>
+                <input type="text" id="full-name" name="name" autocomplete="name" placeholder="Jane Doe" required maxlength="50">
             </div>
 
             <div class="form-group">
-                <label for="password-field">Password Input (<code style="color:red;">type="password"</code>):</label>
-                <input type="password" id="password-field" name="password-field" placeholder="Enter password..." required>
+                <label for="portal-password">Applicant Portal Password:</label>
+                <input type="password" id="portal-password" name="password" autocomplete="new-password" placeholder="Create a secure password..." required>
             </div>
 
             <div class="form-group">
-                <label for="search-field">Search Input (<code style="color:red;">type="search"</code>):</label>
-                <input type="search" id="search-field" name="search-field" placeholder="Search keywords...">
-            </div>
-        </fieldset>
-
-        <!-- Specialized Formats -->
-        <fieldset>
-            <legend>Specialized Format Fields</legend>
-
-            <div class="form-group">
-                <label for="email-field">Email Input (<code style="color:red;">type="email"</code>):</label>
-                <input type="email" id="email-field" name="email-field" placeholder="user@example.com">
-            </div>
-
-            <div class="form-group">
-                <label for="url-field">URL Input (<code style="color:red;">type="url"</code>):</label>
-                <input type="url" id="url-field" name="url-field" placeholder="https://example.com">
-            </div>
-
-            <div class="form-group">
-                <label for="tel-field">Telephone Input (<code style="color:red;">type="tel"</code>):</label>
-                <input type="tel" id="tel-field" name="tel-field" placeholder="123-456-7890" pattern="[0-3]*">
+                <label for="job-id-search">Target Job Title or Requisition ID:</label>
+                <input type="search" id="job-id-search" name="job-search" placeholder="e.g., Senior Software Engineer (REQ-1042)">
             </div>
         </fieldset>
 
-        <!-- Numeric & Slider Fields -->
+        <!-- Contact Information -->
         <fieldset>
-            <legend>Numeric & Slider Inputs</legend>
+            <legend>Contact Information</legend>
 
             <div class="form-group">
-                <label for="number-field">Number Input (<code style="color:red;">type="number"</code>):</label>
-                <input type="number" id="number-field" name="number-field" min="1" max="100" step="1" value="10">
+                <label for="email-address">Email Address:</label>
+                <input type="email" id="email-address" name="email" autocomplete="email" placeholder="jane.doe@example.com" required>
             </div>
 
             <div class="form-group">
-                <label for="range-field">Range Slider (<code style="color:red;">type="range"</code>):</label>
-                <input type="range" id="range-field" name="range-field" min="0" max="100" value="50">
+                <label for="linkedin-url">LinkedIn Profile or Portfolio URL:</label>
+                <input type="url" id="linkedin-url" name="url" autocomplete="url" placeholder="https://linkedin.com/in/janedoe">
+            </div>
+
+            <div class="form-group">
+                <label for="phone-number">Primary Phone Number:</label>
+                <input type="tel" id="phone-number" name="tel" autocomplete="tel" placeholder="123-456-7890">
             </div>
         </fieldset>
 
-        <!-- Date & Time Pickers -->
+        <!-- Experience & Compensation -->
         <fieldset>
-            <legend>Date & Time Fields</legend>
+            <legend>Experience & Compensation</legend>
 
             <div class="form-group">
-                <label for="date-field">Date Picker (<code style="color:red;">type="date"</code>):</label>
-                <input type="date" id="date-field" name="date-field">
+                <label for="years-experience">Total Relevant Experience (Years):</label>
+                <input type="number" id="years-experience" name="years-experience" min="0" max="50" step="1" value="3">
             </div>
 
             <div class="form-group">
-                <label for="datetime-local-field">Datetime Local Picker (<code style="color:red;">type="datetime-local"</code>):</label>
-                <input type="datetime-local" id="datetime-local-field" name="datetime-local-field">
-            </div>
-
-            <div class="form-group">
-                <label for="time-field">Time Picker (<code style="color:red;">type="time"</code>):</label>
-                <input type="time" id="time-field" name="time-field">
-            </div>
-
-            <div class="form-group">
-                <label for="month-field">Month Picker (<code style="color:red;">type="month"</code>):</label>
-                <input type="month" id="month-field" name="month-field">
-            </div>
-
-            <div class="form-group">
-                <label for="week-field">Week Picker (<code style="color:red;">type="week"</code>):</label>
-                <input type="week" id="week-field" name="week-field">
+                <label for="salary-expectation">Expected Annual Salary (in Thousands USD):</label>
+                <input type="range" id="salary-expectation" name="salary-expectation" min="30" max="250" value="100">
             </div>
         </fieldset>
 
-        <!-- Choice Elements -->
+        <!-- Availability & Scheduling -->
         <fieldset>
-            <legend>Choice Elements (Checkboxes & Radios)</legend>
+            <legend>Availability & Timeline</legend>
 
             <div class="form-group">
-                <label>Radio Buttons (<code style="color:red;">type="radio"</code>):</label>
+                <label for="start-date">Earliest Available Start Date:</label>
+                <input type="date" id="start-date" name="start-date">
+            </div>
+
+            <div class="form-group">
+                <label for="interview-slot">Preferred First Interview Slot:</label>
+                <input type="datetime-local" id="interview-slot" name="interview-slot">
+            </div>
+
+            <div class="form-group">
+                <label for="best-call-time">Best Time of Day for Phone Screening:</label>
+                <input type="time" id="best-call-time" name="best-call-time">
+            </div>
+
+            <div class="form-group">
+                <label for="graduation-date">Highest Degree Graduation Month/Year:</label>
+                <input type="month" id="graduation-date" name="graduation-date">
+            </div>
+
+            <div class="form-group">
+                <label for="notice-period-week">Target Notice Period Completion Week:</label>
+                <input type="week" id="notice-period-week" name="notice-period-week">
+            </div>
+        </fieldset>
+
+        <!-- Eligibility & Work Preferences -->
+        <fieldset>
+            <legend>Work Eligibility & Preferences</legend>
+
+            <div class="form-group">
+                <label>Work Authorization Status:</label>
                 <div class="form-group row">
-                    <input type="radio" id="radio-opt1" name="radio-group" value="option1" checked>
-                    <label for="radio-opt1">Option 1 (Pre-selected)</label>
+                    <input type="radio" id="auth-authorized" name="work-authorization" value="authorized" checked>
+                    <label for="auth-authorized">Authorized to work without sponsorship</label>
                 </div>
                 <div class="form-group row">
-                    <input type="radio" id="radio-opt2" name="radio-group" value="option2">
-                    <label for="radio-opt2">Option 2</label>
+                    <input type="radio" id="auth-sponsorship" name="work-authorization" value="requires-sponsorship">
+                    <label for="auth-sponsorship">Will require visa sponsorship now or in the future</label>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Checkboxes (<code style="color:red;">type="checkbox"</code>):</label>
+                <label>Preferred Work Arrangement (Select all that apply):</label>
                 <div class="form-group row">
-                    <input type="checkbox" id="check-opt1" name="check-group" value="box1" checked>
-                    <label for="check-opt1">Checkbox 1 (Pre-selected)</label>
+                    <input type="checkbox" id="work-remote" name="work-arrangement" value="remote" checked>
+                    <label for="work-remote">Remote</label>
                 </div>
                 <div class="form-group row">
-                    <input type="checkbox" id="check-opt2" name="check-group" value="box2">
-                    <label for="check-opt2">Checkbox 2</label>
+                    <input type="checkbox" id="work-hybrid" name="work-arrangement" value="hybrid">
+                    <label for="work-hybrid">Hybrid</label>
+                </div>
+                <div class="form-group row">
+                    <input type="checkbox" id="work-onsite" name="work-arrangement" value="onsite">
+                    <label for="work-onsite">On-site</label>
                 </div>
             </div>
         </fieldset>
 
-        <!-- Advanced Selectors & Text Areas -->
+        <!-- Background & Profile Details -->
         <fieldset>
-            <legend>Drop-downs, Lists & Containers</legend>
+            <legend>Education, Skills & Cover Letter</legend>
 
             <div class="form-group">
-                <label for="dropdown">Single Select Drop-down (<code style="color:red;">&lt;select&gt;</code>):</label>
-                <select id="dropdown" name="dropdown">
-                    <option value="" disabled selected>Choose an entry...</option>
-                    <option value="item1">Item 1</option>
-                    <option value="item2">Item 2</option>
-                    <option value="item3">Item 3</option>
+                <label for="education-level">Highest Level of Education Completed:</label>
+                <select id="education-level" name="education-level">
+                    <option value="" disabled selected>Select highest degree earned...</option>
+                    <option value="high-school">High School Diploma / GED</option>
+                    <option value="bachelors">Bachelor's Degree</option>
+                    <option value="masters">Master's Degree</option>
+                    <option value="doctorate">Doctorate / PhD</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="multi-dropdown">Multi-Select Drop-down (<code style="color:red;">select multiple</code>):</label>
-                <select id="multi-dropdown" name="multi-dropdown" multiple size="3">
-                    <option value="selection1">Selection 1</option>
-                    <option value="selection2">Selection 2</option>
-                    <option value="selection3">Selection 3</option>
+                <label for="core-skills">Primary Skill Sets (Hold Ctrl/Cmd to select multiple):</label>
+                <select id="core-skills" name="core-skills" multiple size="3">
+                    <option value="frontend">Frontend Development (React, Vue)</option>
+                    <option value="backend">Backend Systems (Node, Python, Go)</option>
+                    <option value="devops">DevOps & Cloud (AWS, Docker, K8s)</option>
+                    <option value="product">Product & Project Management</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="datalist-field">Datalist (Combo-box) Auto-suggest (<code style="color:red;">&lt;datalist&gt;</code>):</label>
-                <input type="text" id="datalist-field" name="datalist-field" list="browsers" placeholder="Type to see suggestions...">
-                <datalist id="browsers">
-                    <option value="Chrome">
-                    <option value="Firefox">
-                    <option value="Safari">
-                    <option value="Edge">
-                    <option value="Opera">
+                <label for="department-suggestion">Target Department:</label>
+                <input type="text" id="department-suggestion" name="department" list="department-options" placeholder="Select or type your target team...">
+                <datalist id="department-options">
+                    <option value="Engineering">
+                    <option value="Product Design">
+                    <option value="Data Science & Analytics">
+                    <option value="Customer Success">
+                    <option value="Marketing & Sales">
                 </datalist>
             </div>
 
             <div class="form-group">
-                <label for="textarea-field">Textarea Block (<code style="color:red;">&lt;textarea&gt;</code>):</label>
-                <textarea id="textarea-field" name="textarea-field" rows="4" cols="50" placeholder="Type multi-line text here..."></textarea>
+                <label for="cover-letter">Cover Letter / Note to the Hiring Manager:</label>
+                <textarea id="cover-letter" name="cover-letter" rows="4" cols="50" placeholder="Briefly describe why you are interested in this role and what unique skills you bring..."></textarea>
             </div>
         </fieldset>
 
-        <!-- Media & System Interactions -->
+        <!-- Attachments & System Metrics -->
         <fieldset>
-            <legend>Media & Specialized System Interactions</legend>
+            <legend>Resume Attachment & Application Metadata</legend>
 
             <div class="form-group">
-                <label for="file-field">File Upload Selector (<code style="color:red;">type="file"</code>):</label>
-                <input type="file" id="file-field" name="file-field">
+                <label for="resume-upload">Upload Resume/CV (PDF, DOCX):</label>
+                <input type="file" id="resume-upload" name="resume" accept=".pdf,.doc,.docx">
             </div>
 
             <div class="form-group">
-                <label for="color-field">Color Picker Canvas (<code style="color:red;">type="color"</code>):</label>
-                <input type="color" id="color-field" name="color-field" value="#007BFF">
+                <label for="profile-theme-color">Candidate Profile Accent Color:</label>
+                <input type="color" id="profile-theme-color" name="profile-accent-color" value="#007BFF">
             </div>
 
-            <!-- Hidden Input Element Field for script data pipeline verifications -->
-            <input type="hidden" id="hidden-field" name="hidden-field" value="secret_token_123">
-			            <!-- Readonly vs Disabled behaviors -->
-            <div class="form-group">
-                <label for="readonly-field">Read-Only Field (Will submit to server):</label>
-                <input type="text" id="readonly-field" name="readonly-field" value="Locked value" readonly>
-            </div>
+            <!-- Hidden Application Tracking Token -->
+            <input type="hidden" id="applicant-token" name="applicant_tracking_token" value="APP_REF_987654">
 
+            <!-- Readonly vs Disabled Fields -->
             <div class="form-group">
-                <label for="disabled-field">Disabled Field (Will NOT submit to server):</label>
-                <input type="text" id="disabled-field" name="disabled-field" value="Ignored value" disabled>
-            </div>
-
-            <!-- Output, Progress and Meter elements -->
-            <div class="form-group">
-                <label for="calculation-output">Calculation Container (<code style="color:red;">&lt;output&gt;</code>):</label>
-                <output id="calculation-output" name="calculation-output">Rendered Calculation Result</output>
+                <label for="system-application-id">Application Reference ID (Assigned by system):</label>
+                <input type="text" id="system-application-id" name="application-id" value="JOB-2026-X884" readonly>
             </div>
 
             <div class="form-group">
-                <label for="progress-bar">Progress Bar (<code style="color:red;">&lt;progress&gt;</code>):</label>
-                <progress id="progress-bar" max="100" value="70">70%</progress>
+                <label for="internal-recruiter-notes">Recruiter Internal Code (Locked):</label>
+                <input type="text" id="internal-recruiter-notes" name="recruiter-notes" value="TIER-1-PRIORITY" disabled>
+            </div>
+
+            <!-- Output, Progress, and Meter Elements -->
+            <div class="form-group">
+                <label for="estimated-total-comp">Calculated Estimated Total Compensation:</label>
+                <output id="estimated-total-comp" name="estimated-total-comp">$120,000 / year</output>
             </div>
 
             <div class="form-group">
-                <label for="meter-bar">Value Meter (<code style="color:red;">&lt;meter&gt;</code>):</label>
-                <meter id="meter-bar" min="0" max="100" low="30" high="80" optimum="90" value="85">Excellent</meter>
+                <label for="profile-completion">Profile Completion Progress:</label>
+                <progress id="profile-completion" max="100" value="85">85%</progress>
             </div>
 
-            <!-- Image Submit Target -->
             <div class="form-group">
-                <label>Graphical Submit Button (<code style="color:red;">type="image"</code>):</label>
-                <input type="image" src="https://placeholder.com" alt="Submit Form Button" name="image-submit">
+                <label for="qualification-match">Role Requirement Match Rating:</label>
+                <meter id="qualification-match" min="0" max="100" low="40" high="80" optimum="95" value="90">90% Match</meter>
             </div>
 
-            <!-- Alternate Native Button Input -->
+            <!-- Submit Elements -->
             <div class="form-group">
-                <label>Input Button Alternative (<code style="color:red;">type="button"</code>):</label>
-                <input type="button" value="Legacy Form Button" onclick="alert('Input-type button clicked!')">
+                <label>Submit Application via Brand Icon:</label>
+                <input type="image" src="https://placehold.co/150x40/007BFF/FFFFFF?text=Submit+Application" alt="Submit Application Button" name="image-submit">
+            </div>
+
+            <div class="form-group">
+                <label>Save Application Draft:</label>
+                <input type="button" value="Save Progress" onclick="alert('Application draft saved!')">
             </div>
         </fieldset>
 
-</form>
+        <div class="buttons">
+            <input type="submit" value="Submit Application">
+            <input type="reset" value="Clear Form">
+        </div>
+
+    </form>
+</body>
+</html>

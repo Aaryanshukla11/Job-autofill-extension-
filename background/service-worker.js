@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     (async () => {
       const settings = await getSettings();
       const apiKey = msg.apiKey || settings.geminiApiKey;
-      const model  = msg.model  || settings.aiModel || 'models/gemini-2.5-flash-lite';
+      const model  = msg.model  || settings.aiModel || 'models/gemini-3.7-flash';
 
       const result = await callGeminiApi({
         apiKey,
