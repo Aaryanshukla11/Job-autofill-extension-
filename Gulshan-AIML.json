@@ -1,0 +1,228 @@
+{
+  "name": "Gulshan Mishra",
+  "data": {
+    "Title": "Senior AI / ML Engineer | AI Full Stack Tech Lead",
+    "Skills": {
+      "Languages": [
+        "Java 11",
+        "Java 8",
+        "Kotlin",
+        "JavaScript",
+        "TypeScript",
+        "Python"
+      ],
+      "Frontend": [
+        "React js",
+        "Redux",
+        "MobX"
+      ],
+      "AI_GenAI_Core": [
+        "AI/ML",
+        "GenAI",
+        "Agentic AI",
+        "LLM",
+        "Conversational AI",
+        "Context Engineering",
+        "Prompt engineering",
+        "RAG",
+        "Multi-Agent Systems",
+        "Knowledge Graphs",
+        "NLP",
+        "AI Evaluation"
+      ],
+      "AI_Engineering_Tools": [
+        "GitHub Copilot",
+        "Copilot CLI",
+        "Claude Code",
+        "Cursor",
+        "LangGraph",
+        "OpenAI APIs",
+        "RAG workflows",
+        "vector DB",
+        "AI assistants",
+        "LLM orchestration",
+        "Agent workflows",
+        "Embedding models",
+        "Semantic Search"
+      ],
+      "Backend_Frameworks": [
+        "Spring Boot",
+        "Hibernate",
+        "Microservices",
+        "MyBatis"
+      ],
+      "Testing_Frameworks": [
+        "Mockito",
+        "MockK",
+        "Jest"
+      ],
+      "Cloud_DevOps": [
+        "AWS",
+        "Azure",
+        "Databricks",
+        "Docker",
+        "Kubernetes",
+        "Jenkins"
+      ],
+      "Database_Search": [
+        "MongoDB",
+        "PostgreSQL",
+        "Elastic Search"
+      ],
+      "CS_Fundamentals": [
+        "Data structures",
+        "Algorithms",
+        "DS&A",
+        "Problem solving"
+      ],
+      "Leadership_Agile": [
+        "Technology Lead",
+        "Leadership",
+        "Mentoring",
+        "Agile",
+        "Scrum"
+      ]
+    },
+    "Contact details": {
+      "Phone": "+44 7520 642431",
+      "Email ID": "egmox2@gmail.com",
+      "GitHub": "https://github.com/egmox",
+      "GitHubText": "egmox",
+      "LinkedIn": "https://linkedin.com/in/egmox",
+      "LinkedInText": "Gulshan Mishra",
+      "Twitter": "https://twitter.com/egmox",
+      "TwitterText": "@egmox"
+    },
+    "Certification": [
+      {
+        "Name": "NIELIT Certified Java developer",
+        "Issued": "September 2013"
+      },
+      {
+        "Name": "AI-102",
+        "Issued": "March 2026"
+      },
+      {
+        "Name": "PGDM in Data Engineering",
+        "Issued": "2023"
+      }
+    ],
+    "Profile Highlights": [
+      "AI Full Stack Lead with 9+ years of experience building scalable backend systems and AI-powered applications",
+      "Hands-on experience designing and implementing GenAI, Agentic AI, RAG, and LLM-powered solutions",
+      "Experience building AI assistants, multi-step agent workflows, contextual retrieval systems, and conversational AI applications",
+      "Strong experience with prompt engineering, context engineering, AI orchestration frameworks, and production AI integrations",
+      "Driving AI-driven transformation initiatives by leveraging LLMs and AI-assisted engineering workflows",
+      "Delivered 6 months’ worth of engineering output within weeks using AI-assisted development workflows",
+      "Strong backend expertise with Java, Python, Spring Boot, Microservices, and modern frontend technologies",
+      "Experience leveraging AWS and Azure to build and scale production-grade distributed and AI-enabled systems",
+      "Leading engineering initiatives with ownership of architecture, delivery, execution, and business impact",
+      "Experience collaborating with business stakeholders to design, evaluate, and continuously improve AI-driven features"
+    ],
+    "Work Experience": [
+      {
+        "Company": "EPAM Systems",
+        "Duration": "Mar/2024 to Present",
+        "Role": "Technical Lead / AI Full Stack Lead - Robert Bosch client",
+        "Details": [
+          "Leading AI-driven transformation initiatives for enterprise products and engineering teams",
+          "Designed and implemented GenAI-powered solutions leveraging LLMs, prompt engineering, contextual retrieval, and agentic workflows",
+          "Worked on Agentic AI systems using LangGraph-based orchestration patterns for multi-step reasoning and task execution",
+          "Built RAG-based solutions integrating vector search, semantic retrieval, and enterprise knowledge sources",
+          "Implemented context engineering strategies to improve response quality, accuracy, and user experience in AI applications",
+          "Designed backend services and APIs supporting AI-powered features using Java, Spring Boot, Python, and Microservices",
+          "Worked on evaluation and optimization of AI workflows through iterative testing, prompt refinement, and feedback-driven improvements",
+          "Using OpenAI APIs, AI assistants, and modern AI engineering tooling to accelerate development and delivery",
+          "Working with Azure and AWS to deploy scalable AI-enabled enterprise systems",
+          "Leading a team of engineers while driving adoption of AI engineering best practices and delivery excellence",
+          "Collaborating with international stakeholders and distributed teams across regions to deliver globally used enterprise platforms"
+        ]
+      },
+      {
+        "Company": "Adobe",
+        "Duration": "Oct/2022 to Mar/2024",
+        "Role": "Computer Scientist I",
+        "Details": [
+          "Developed and delivered end-to-end platform features for Adobe Experience Manager Forms",
+          "Contributed to intelligent document-processing and conversational workflow initiatives involving LLM-powered integrations",
+          "Built backend services and APIs supporting scalable enterprise applications",
+          "Worked on chatbot and conversational AI integrations to improve user interaction workflows",
+          "Participated in prompt engineering, response optimization, and evaluation of AI-assisted user experiences",
+          "Collaborated with product and engineering teams to design and refine customer-facing platform capabilities",
+          "Skills used: Java, Spring Boot, Python, Microservices, REST APIs, AI Integrations"
+        ]
+      },
+      {
+        "Company": "Arcesium",
+        "Duration": "Dec/2021 to Sep/2022",
+        "Role": "Senior Full Stack Developer (Contract)",
+        "Details": [
+          "Developed scalable backend and frontend systems for financial operations and accounting workflows",
+          "Built Python and Java services supporting data-intensive business processes",
+          "Worked on intelligent data retrieval, search, and workflow automation use cases",
+          "Contributed to foundational AI/ML and NLP experimentation for internal productivity and automation initiatives",
+          "Collaborated with cross-functional teams to improve operational efficiency through automation and data-driven solutions",
+          "Skills used: Python, Java, Kotlin, React.js, TypeScript"
+        ]
+      },
+      {
+        "Company": "Verizon",
+        "Duration": "Jan/2018 to Oct/2021",
+        "Role": "Full Stack Developer",
+        "Projects": [
+          {
+            "Name": "Building capacity management tool",
+            "Details": [
+              "Developed system to analyze building usage and capacity",
+              "Used globally across Verizon offices",
+              "Skills used: Java, Spring Boot, Microservices"
+            ]
+          },
+          {
+            "Name": "KYC Microservice",
+            "Details": [
+              "Built microservice for user KYC processing",
+              "Integrated with multiple downstream systems",
+              "Skills used: MongoDB, Spring Boot, Microservices"
+            ]
+          },
+          {
+            "Name": "User Management System",
+            "Details": [
+              "Developed backend system for managing users and roles",
+              "Optimized for low-bandwidth environments",
+              "Skills used: Java, Microservices, PostgreSQL"
+            ]
+          }
+        ]
+      },
+      {
+        "Company": "Infogain",
+        "Duration": "Jul/2017 to Jan/2018",
+        "Role": "Intern"
+      }
+    ],
+    "AI Experience": {
+      "GenAI": "2+ years",
+      "Agentic AI": "2+ years",
+      "Context Engineering": "2.5 years",
+      "Projects": {
+        "GenAI Projects": 3,
+        "Agentic AI Projects": 1,
+        "Current Company AI Projects": 2
+      }
+    },
+    "Education": [
+      {
+        "Degree": "Master’s in finance",
+        "Institute": "Narsee Monjee Institute of Management Studies",
+        "Duration": "Jan/2021 to Dec/2022"
+      },
+      {
+        "Degree": "B.Tech in Computer Science",
+        "Institute": "Deenbandhu Chhotu Ram University Of Science And Technology",
+        "Duration": "Aug/2014 to Aug/2017"
+      }
+    ]
+  }
+}
