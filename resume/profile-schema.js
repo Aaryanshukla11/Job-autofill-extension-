@@ -1,6 +1,6 @@
 /**
  * Authoritative Candidate Profile Schema Definition & Helpers
- * Supports both nested schema structures and flat JSON imports.
+ * Supports nested schema structures, flat JSON imports, and deeply nested/wrapped JSON payloads.
  */
 
 export function createEmptyProfile() {
@@ -66,35 +66,52 @@ export function sanitizeProfile(input = {}) {
   
   if (!input || typeof input !== 'object') return schema;
 
-  // 1. Nested schema extraction
-  schema.personal = { ...schema.personal, ...(input.personal || {}) };
-  schema.contact = { ...schema.contact, ...(input.contact || {}) };
+  // 0. Unwrap "data" or "profile" wrappers if present
+  let source = { ...input };
+  if (source.data && typeof source.data === 'object') {
+    source = { ...source, ...source.data };
+  }
+
+  // 1. Direct Nested schema extraction
+  schema.personal = { ...schema.personal, ...(source.personal || {}) };
+  schema.contact = { ...schema.contact, ...(source.contact || {}) };
   schema.professional = { 
     ...schema.professional, 
-    ...(input.professional || {})
+    ...(source.professional || {})
   };
 
-  schema.links = { ...schema.links, ...(input.links || {}) };
+  schema.links = { ...schema.links, ...(source.links || {}) };
   schema.preferences = {
     ...schema.preferences,
-    ...(input.preferences || {}),
-    preferredLocations: Array.isArray(input.preferences?.preferredLocations) ? input.preferences.preferredLocations : [],
-    preferredRoles: Array.isArray(input.preferences?.preferredRoles) ? input.preferences.preferredRoles : []
+    ...(source.preferences || {}),
+    preferredLocations: Array.isArray(source.preferences?.preferredLocations) ? source.preferences.preferredLocations : [],
+    preferredRoles: Array.isArray(source.preferences?.preferredRoles) ? source.preferences.preferredRoles : []
   };
 
-  schema.education = Array.isArray(input.education) ? input.education : [];
-  schema.experience = Array.isArray(input.experience) ? input.experience : [];
-  schema.projects = Array.isArray(input.projects) ? input.projects : [];
-  schema.certifications = Array.isArray(input.certifications) ? input.certifications : [];
-  schema.documents = { ...schema.documents, ...(input.documents || {}) };
-  schema.customFields = typeof input.customFields === 'object' && input.customFields !== null ? { ...input.customFields } : {};
+  schema.education = Array.isArray(source.education || source.Education) ? (source.education || source.Education) : [];
+  schema.experience = Array.isArray(source.experience || source.Experience || source['Work Experience']) ? (source.experience || source.Experience || source['Work Experience']) : [];
+  schema.projects = Array.isArray(source.projects || source.Projects) ? (source.projects || source.Projects) : [];
+  schema.certifications = Array.isArray(source.certifications || source.Certifications || source.Certification) ? (source.certifications || source.Certifications || source.Certification) : [];
+  schema.documents = { ...schema.documents, ...(source.documents || {}) };
+  schema.customFields = typeof source.customFields === 'object' && source.customFields !== null ? { ...source.customFields } : {};
 
-  // 2. Flat JSON property normalization
-  if (input.firstName && !schema.personal.firstName) schema.personal.firstName = String(input.firstName).trim();
-  if (input.middleName && !schema.personal.middleName) schema.personal.middleName = String(input.middleName).trim();
-  if (input.lastName && !schema.personal.lastName) schema.personal.lastName = String(input.lastName).trim();
-  if ((input.fullName || input.name) && !schema.personal.fullName) {
-    schema.personal.fullName = String(input.fullName || input.name).trim();
+  // 2. Recursive Deep Search for key-value pairs at any depth
+  const allKv = flattenObjectToKvPairs(input);
+
+  // Name
+  const nameVal = findKvMatch(allKv, ['fullname', 'name', 'candidatename', 'username']);
+  if (nameVal && !schema.personal.fullName && typeof nameVal === 'string') {
+    schema.personal.fullName = nameVal.trim();
+  }
+
+  const fnVal = findKvMatch(allKv, ['firstname', 'givenname', 'forename']);
+  if (fnVal && !schema.personal.firstName && typeof fnVal === 'string') {
+    schema.personal.firstName = fnVal.trim();
+  }
+
+  const lnVal = findKvMatch(allKv, ['lastname', 'surname', 'familyname']);
+  if (lnVal && !schema.personal.lastName && typeof lnVal === 'string') {
+    schema.personal.lastName = lnVal.trim();
   }
 
   // Auto-split name into firstName/lastName if missing
@@ -108,52 +125,98 @@ export function sanitizeProfile(input = {}) {
     }
   }
 
-  if (input.email && !schema.contact.email) schema.contact.email = String(input.email).trim();
-  if (input.phone && !schema.contact.phone) schema.contact.phone = String(input.phone).trim();
-  if ((input.address || input.location) && !schema.contact.address) {
-    schema.contact.address = String(input.address || input.location).trim();
-  }
-  if (input.city && !schema.contact.city) schema.contact.city = String(input.city).trim();
-  if (input.state && !schema.contact.state) schema.contact.state = String(input.state).trim();
-  if (input.country && !schema.contact.country) schema.contact.country = String(input.country).trim();
-  if (input.postalCode && !schema.contact.postalCode) schema.contact.postalCode = String(input.postalCode).trim();
-
-  if ((input.currentTitle || input.title || input.jobTitle || input.designation) && !schema.professional.currentTitle) {
-    schema.professional.currentTitle = String(input.currentTitle || input.title || input.jobTitle || input.designation).trim();
-  }
-  if ((input.currentCompany || input.company || input.organization) && !schema.professional.currentCompany) {
-    schema.professional.currentCompany = String(input.currentCompany || input.company || input.organization).trim();
-  }
-  if ((input.totalExperience || input.experience) && !schema.professional.totalExperience && typeof (input.totalExperience || input.experience) !== 'object') {
-    schema.professional.totalExperience = String(input.totalExperience || input.experience).trim();
+  // Contact Details
+  const emailVal = findKvMatch(allKv, ['email', 'emailid', 'contactemail', 'applicantemail', 'mail']);
+  if (emailVal && !schema.contact.email && typeof emailVal === 'string') {
+    schema.contact.email = emailVal.trim();
   }
 
-  // Skills normalization (handles string or array)
-  let rawSkills = input.professional?.skills || input.skills || [];
-  if (typeof rawSkills === 'string') {
-    rawSkills = rawSkills.split(',').map(s => s.trim()).filter(Boolean);
-  }
-  schema.professional.skills = Array.isArray(rawSkills) ? rawSkills.map(s => String(s).trim()).filter(Boolean) : [];
-
-  if (input.linkedin && !schema.links.linkedin) schema.links.linkedin = String(input.linkedin).trim();
-  if (input.github && !schema.links.github) schema.links.github = String(input.github).trim();
-  if ((input.portfolio || input.website) && !schema.links.portfolio) {
-    schema.links.portfolio = String(input.portfolio || input.website).trim();
+  const phoneVal = findKvMatch(allKv, ['phone', 'phone1', 'phone2', 'mobile', 'cell', 'contactnumber', 'tel']);
+  if (phoneVal && !schema.contact.phone && typeof phoneVal === 'string') {
+    schema.contact.phone = phoneVal.trim();
   }
 
-  // Capture unmapped flat JSON properties as customFields
-  const knownKeys = new Set([
-    'personal', 'contact', 'professional', 'education', 'experience', 'projects', 'certifications',
-    'links', 'preferences', 'documents', 'customFields',
-    'firstName', 'middleName', 'lastName', 'fullName', 'name', 'email', 'phone', 'address', 'location', 'city', 'state',
-    'country', 'postalCode', 'currentTitle', 'title', 'jobTitle', 'designation', 'currentCompany', 'company', 'organization',
-    'totalExperience', 'experience', 'skills', 'linkedin', 'github', 'portfolio', 'website'
-  ]);
+  const addressVal = findKvMatch(allKv, ['address', 'location', 'city', 'state']);
+  if (addressVal && !schema.contact.address && typeof addressVal === 'string') {
+    schema.contact.address = addressVal.trim();
+  }
 
-  for (const [k, v] of Object.entries(input)) {
-    if (!knownKeys.has(k) && v !== undefined && v !== null && typeof v !== 'object') {
-      if (!schema.customFields[k]) {
-        schema.customFields[k] = String(v).trim();
+  // Title & Company
+  const titleVal = findKvMatch(allKv, ['title', 'currenttitle', 'jobtitle', 'designation', 'role', 'position']);
+  if (titleVal && !schema.professional.currentTitle && typeof titleVal === 'string') {
+    schema.professional.currentTitle = titleVal.trim();
+  }
+
+  const companyVal = findKvMatch(allKv, ['company', 'currentcompany', 'employer', 'organization', 'workplace']);
+  if (companyVal && !schema.professional.currentCompany && typeof companyVal === 'string') {
+    schema.professional.currentCompany = companyVal.trim();
+  }
+
+  // Top experience fallback for company & title
+  if (schema.experience.length > 0) {
+    const topExp = schema.experience[0];
+    if (typeof topExp === 'object' && topExp !== null) {
+      const topComp = topExp.Company || topExp.company || topExp.Employer || topExp.employer;
+      if (topComp && !schema.professional.currentCompany && typeof topComp === 'string') {
+        schema.professional.currentCompany = topComp.trim();
+      }
+      const topRole = topExp.Role || topExp.role || topExp.Title || topExp.title || topExp.Position || topExp.position;
+      if (topRole && !schema.professional.currentTitle && typeof topRole === 'string') {
+        schema.professional.currentTitle = topRole.trim();
+      }
+    }
+  }
+
+  // Total Experience
+  const expVal = findKvMatch(allKv, ['totalexperience', 'experience', 'yearsofexperience']);
+  if (expVal && !schema.professional.totalExperience && typeof expVal === 'string') {
+    schema.professional.totalExperience = expVal.trim();
+  }
+
+  // Skills
+  let skillsArr = [];
+  if (Array.isArray(source.Skills)) {
+    skillsArr = source.Skills;
+  } else if (source.Skills && Array.isArray(source.Skills.skills)) {
+    skillsArr = source.Skills.skills;
+  } else if (source.skills && Array.isArray(source.skills)) {
+    skillsArr = source.skills;
+  } else {
+    const rawSkills = findKvMatch(allKv, ['skills', 'keyskills', 'technologystack', 'competencies']);
+    if (Array.isArray(rawSkills)) {
+      skillsArr = rawSkills;
+    } else if (rawSkills && typeof rawSkills === 'object' && Array.isArray(rawSkills.skills)) {
+      skillsArr = rawSkills.skills;
+    } else if (typeof rawSkills === 'string') {
+      skillsArr = rawSkills.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  if (skillsArr.length > 0) {
+    schema.professional.skills = skillsArr.map(s => String(s).trim()).filter(Boolean);
+  }
+
+  // Links
+  const linkedinVal = findKvMatch(allKv, ['linkedin', 'linkedinurl']);
+  if (linkedinVal && !schema.links.linkedin && typeof linkedinVal === 'string') {
+    schema.links.linkedin = linkedinVal.trim();
+  }
+
+  const githubVal = findKvMatch(allKv, ['github', 'githuburl']);
+  if (githubVal && !schema.links.github && typeof githubVal === 'string') {
+    schema.links.github = githubVal.trim();
+  }
+
+  const portfolioVal = findKvMatch(allKv, ['portfolio', 'website', 'personalwebsite']);
+  if (portfolioVal && !schema.links.portfolio && typeof portfolioVal === 'string') {
+    schema.links.portfolio = portfolioVal.trim();
+  }
+
+  // Capture unmapped flat properties into customFields
+  for (const { key, value } of allKv) {
+    if (value && typeof value !== 'object' && !Array.isArray(value)) {
+      const cleanKey = key.trim();
+      if (!isStandardProfileField(cleanKey) && !schema.customFields[cleanKey]) {
+        schema.customFields[cleanKey] = String(value).trim();
       }
     }
   }
@@ -166,4 +229,41 @@ export function sanitizeProfile(input = {}) {
   }
 
   return schema;
+}
+
+/**
+ * Helper to recursively flatten an object into key-value pairs at any depth.
+ */
+function flattenObjectToKvPairs(obj, prefix = '') {
+  const kvPairs = [];
+  if (!obj || typeof obj !== 'object') return kvPairs;
+
+  for (const [k, v] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${k}` : k;
+    if (v !== null && v !== undefined) {
+      kvPairs.push({ key: k, fullKey, value: v });
+      if (typeof v === 'object' && !Array.isArray(v)) {
+        kvPairs.push(...flattenObjectToKvPairs(v, fullKey));
+      }
+    }
+  }
+  return kvPairs;
+}
+
+function findKvMatch(kvPairs, searchKeys = []) {
+  for (const sk of searchKeys) {
+    const target = sk.toLowerCase().replace(/[^a-z0-9]/g, '');
+    for (const { key, value } of kvPairs) {
+      const cleanK = key.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (cleanK === target) {
+        if (value !== undefined && value !== null) return value;
+      }
+    }
+  }
+  return null;
+}
+
+function isStandardProfileField(keyStr) {
+  const norm = keyStr.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return /firstname|lastname|fullname|name|email|phone|address|city|state|country|zip|postal|currenttitle|title|currentcompany|company|employer|totalexperience|experience|skills|linkedin|github|portfolio/i.test(norm);
 }

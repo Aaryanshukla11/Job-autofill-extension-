@@ -1,51 +1,33 @@
 /**
- * Minimal & Editorial Profile View Component with Field Type Selector
+ * Natural & Human-Centered "Your Information" Profile View Component
+ * Zero technical jargon, zero raw JSON exposed. Simple personal information manager.
  */
 
 import { saveCandidateProfile } from '../../storage/storage.js';
 import { sanitizeProfile } from '../../resume/profile-schema.js';
+import { getUserMemory, saveUserMemory, saveRememberedAnswer } from '../../memory/memory-store.js';
 
-const FIELD_PRESETS = [
-  { label: 'Custom Field', key: '', placeholder: 'Field Value' },
-  { label: 'Job Title', key: 'Job Title', placeholder: 'e.g. Senior Software Engineer' },
-  { label: 'Current Company', key: 'Current Company', placeholder: 'e.g. Google / Acme Corp' },
-  { label: 'Notice Period', key: 'Notice Period', placeholder: 'e.g. 15 days / Immediate' },
-  { label: 'Expected Salary', key: 'Expected Salary', placeholder: 'e.g. $120,000 / annum' },
-  { label: 'Current Salary', key: 'Current Salary', placeholder: 'e.g. $100,000 / annum' },
-  { label: 'Work Authorization / Visa', key: 'Work Authorization', placeholder: 'e.g. Authorized / H1B / Citizen' },
-  { label: 'Middle Name', key: 'Middle Name', placeholder: 'e.g. Alexander' },
-  { label: 'Date of Birth', key: 'Date of Birth', placeholder: 'e.g. YYYY-MM-DD' },
-  { label: 'Postal / Zip Code', key: 'Postal Code', placeholder: 'e.g. 10001' },
-  { label: 'Alternate Phone', key: 'Alternate Phone', placeholder: 'e.g. +1 (555) 987-6543' }
-];
+export async function renderProfileView(container, { candidateProfile, onProfileUpdated }) {
+  const memory = await getUserMemory();
+  const profile = memory.profile || candidateProfile || {};
 
-export function renderProfileView(container, { candidateProfile, onProfileUpdated }) {
-  const p = candidateProfile.personal || {};
-  const c = candidateProfile.contact || {};
-  const prof = candidateProfile.professional || {};
-  const l = candidateProfile.links || {};
-  const custom = candidateProfile.customFields || {};
+  const p = profile.personal || {};
+  const c = profile.contact || {};
+  const prof = profile.professional || {};
+  const l = profile.links || {};
+  const savedAnswers = memory.rememberedAnswers || [];
 
   const skillsStr = (prof.skills || []).join(', ');
 
   container.innerHTML = `
     <div class="section">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-        <div>
-          <div class="section-title">Candidate Profile</div>
-          <h2 class="section-heading">Profile Details</h2>
-        </div>
-        <div style="display: flex; gap: 6px;">
-          <button id="btn-export-json" class="btn-sm-outline" title="Export JSON">Export JSON</button>
-          <button id="btn-import-json" class="btn-sm-outline" title="Import JSON">Import JSON</button>
-          <input type="file" id="import-json-file" accept=".json" hidden />
-        </div>
-      </div>
-      <p class="section-desc">Fields used for matching and autofilling forms.</p>
+      <div class="section-title">Your Information</div>
+      <h2 class="section-heading">${escapeHtml(p.fullName || 'Candidate Profile')}</h2>
+      <p class="section-desc">Information used to automatically answer job application questions.</p>
 
       <form id="profile-form">
         <!-- Personal -->
-        <div class="section-title" style="margin-top: 14px;">Personal Information</div>
+        <div class="section-title" style="margin-top: 14px;">Personal Details</div>
         <div class="form-row">
           <div class="form-col">
             <label>First Name</label>
@@ -58,7 +40,7 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
         </div>
 
         <!-- Contact -->
-        <div class="section-title" style="margin-top: 14px;">Contact Information</div>
+        <div class="section-title" style="margin-top: 14px;">Contact Details</div>
         <div class="form-row">
           <div class="form-col">
             <label>Email</label>
@@ -78,7 +60,7 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
         </div>
 
         <!-- Professional -->
-        <div class="section-title" style="margin-top: 14px;">Professional</div>
+        <div class="section-title" style="margin-top: 14px;">Professional Information</div>
         <div class="form-row">
           <div class="form-col">
             <label>Current Title</label>
@@ -105,7 +87,7 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
         </div>
 
         <!-- Links -->
-        <div class="section-title" style="margin-top: 14px;">Links</div>
+        <div class="section-title" style="margin-top: 14px;">Professional Links</div>
         <div class="form-row">
           <div class="form-col">
             <label>LinkedIn URL</label>
@@ -118,26 +100,30 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
             <input type="url" id="l-github" value="${escapeVal(l.github)}" placeholder="https://github.com/johndoe" />
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-col">
-            <label>Portfolio URL</label>
-            <input type="url" id="l-portfolio" value="${escapeVal(l.portfolio)}" placeholder="https://johndoe.dev" />
-          </div>
-        </div>
 
-        <!-- Custom & Extra Fields -->
+        <!-- Saved Information -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
-          <div class="section-title" style="margin: 0;">Custom & Additional Fields</div>
-          <button type="button" id="btn-add-custom-field" class="btn-sm-outline">+ Add field</button>
+          <div class="section-title" style="margin: 0;">Saved Information (${savedAnswers.length})</div>
+          <button type="button" id="btn-add-saved-answer" class="btn-sm-outline">+ Add information</button>
         </div>
 
-        <div id="custom-fields-container" style="margin-top: 8px;">
-          ${Object.entries(custom).map(([key, val], idx) => renderCustomFieldRow(key, val, idx)).join('')}
+        <div id="saved-answers-container" style="margin-top: 8px;">
+          ${savedAnswers.map((ans, idx) => `
+            <div class="form-row saved-answer-row" style="align-items: center; margin-bottom: 8px;" data-idx="${idx}">
+              <div class="form-col" style="flex: 1;">
+                <input type="text" class="ans-question" value="${escapeVal(ans.questionText || ans.meaning)}" placeholder="Question / Detail name" />
+              </div>
+              <div class="form-col" style="flex: 1.5;">
+                <input type="text" class="ans-value" value="${escapeVal(ans.value)}" placeholder="Your saved answer" />
+              </div>
+              <button type="button" class="btn-del-answer" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 4px; font-size: 13px;">✕</button>
+            </div>
+          `).join('')}
         </div>
 
         <div class="section" style="margin-top: 20px;">
           <button type="submit" class="btn btn-primary" id="btn-save-profile">
-            Save Profile
+            Save Information
           </button>
           <div id="save-toast" class="toast"></div>
         </div>
@@ -145,61 +131,31 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
     </div>
   `;
 
-  // Bind custom field select handlers
-  const customContainer = document.getElementById('custom-fields-container');
-  bindCustomFieldRows(customContainer);
-
-  document.getElementById('btn-add-custom-field').addEventListener('click', () => {
-    const idx = customContainer.querySelectorAll('.custom-field-row').length;
+  // Bind Add Saved Answer
+  const answersContainer = document.getElementById('saved-answers-container');
+  document.getElementById('btn-add-saved-answer').addEventListener('click', () => {
     const div = document.createElement('div');
-    div.innerHTML = renderCustomFieldRow('', '', idx);
-    const newRow = div.firstElementChild;
-    customContainer.appendChild(newRow);
-    bindCustomRowEvents(newRow);
+    div.className = 'form-row saved-answer-row';
+    div.style.cssText = 'align-items: center; margin-bottom: 8px;';
+    div.innerHTML = `
+      <div class="form-col" style="flex: 1;">
+        <input type="text" class="ans-question" value="" placeholder="Question name (e.g. Notice Period)" />
+      </div>
+      <div class="form-col" style="flex: 1.5;">
+        <input type="text" class="ans-value" value="" placeholder="Your answer (e.g. 15 days)" />
+      </div>
+      <button type="button" class="btn-del-answer" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 4px; font-size: 13px;">✕</button>
+    `;
+    answersContainer.appendChild(div);
+    div.querySelector('.btn-del-answer').addEventListener('click', () => div.remove());
   });
 
-  // Export JSON
-  document.getElementById('btn-export-json').addEventListener('click', (e) => {
-    e.preventDefault();
-    const currentData = getFormProfileData();
-    const jsonStr = JSON.stringify(currentData, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `candidate-profile-${(currentData.personal.firstName || 'user').toLowerCase()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  // Import JSON
-  const fileInput = document.getElementById('import-json-file');
-  document.getElementById('btn-import-json').addEventListener('click', (e) => {
-    e.preventDefault();
-    fileInput.value = '';
-    fileInput.click();
-  });
-
-  fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const text = await file.text();
-      const rawImported = JSON.parse(text);
-      const imported = sanitizeProfile(rawImported);
-      await saveCandidateProfile(imported);
-      if (onProfileUpdated) onProfileUpdated(imported);
-      renderProfileView(container, { candidateProfile: imported, onProfileUpdated });
-
-      const toast = document.getElementById('save-toast');
-      if (toast) {
-        toast.className = 'toast success';
-        toast.textContent = '✓ Profile Loaded from JSON';
-        setTimeout(() => toast.textContent = '', 3000);
-      }
-    } catch (err) {
-      alert('Failed to import JSON profile: ' + err.message);
-    }
+  // Bind Delete Answer
+  answersContainer.querySelectorAll('.btn-del-answer').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const row = e.target.closest('.saved-answer-row');
+      if (row) row.remove();
+    });
   });
 
   // Save Form
@@ -208,26 +164,18 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
-    const updated = getFormProfileData();
 
-    await saveCandidateProfile(updated);
-    toast.className = 'toast success';
-    toast.textContent = '✓ Profile Saved';
-    setTimeout(() => toast.textContent = '', 2500);
-
-    if (onProfileUpdated) onProfileUpdated(updated);
-  });
-
-  function getFormProfileData() {
-    const customFields = {};
-    customContainer.querySelectorAll('.custom-field-row').forEach(row => {
-      const k = row.querySelector('.custom-key').value.trim();
-      const v = row.querySelector('.custom-val').value.trim();
-      if (k) customFields[k] = v;
+    const newSavedAnswers = [];
+    answersContainer.querySelectorAll('.saved-answer-row').forEach(row => {
+      const q = row.querySelector('.ans-question').value.trim();
+      const v = row.querySelector('.ans-value').value.trim();
+      if (q && v) {
+        newSavedAnswers.push({ questionText: q, meaning: q, value: v });
+      }
     });
 
-    return sanitizeProfile({
-      ...candidateProfile,
+    const updatedProfile = sanitizeProfile({
+      ...profile,
       personal: {
         ...p,
         firstName: document.getElementById('p-firstName').value.trim(),
@@ -250,68 +198,27 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
       links: {
         ...l,
         linkedin: document.getElementById('l-linkedin').value.trim(),
-        github: document.getElementById('l-github').value.trim(),
-        portfolio: document.getElementById('l-portfolio').value.trim()
-      },
-      customFields
-    });
-  }
-}
-
-function renderCustomFieldRow(key = '', val = '', idx = 0) {
-  const matchedPreset = FIELD_PRESETS.find(p => p.key && p.key.toLowerCase() === key.toLowerCase());
-  const selectedType = matchedPreset ? matchedPreset.key : (key ? 'custom' : '');
-
-  return `
-    <div class="form-row custom-field-row" style="align-items: center; margin-bottom: 8px;" data-custom-idx="${idx}">
-      <div class="form-col" style="flex: 1;">
-        <select class="custom-type-select">
-          ${FIELD_PRESETS.map(p => `
-            <option value="${p.key}" ${p.key === selectedType ? 'selected' : ''}>${p.label}</option>
-          `).join('')}
-        </select>
-      </div>
-      <div class="form-col" style="flex: 1;">
-        <input type="text" class="custom-key" value="${escapeVal(key)}" placeholder="Field Name" />
-      </div>
-      <div class="form-col" style="flex: 1.5;">
-        <input type="text" class="custom-val" value="${escapeVal(val)}" placeholder="${matchedPreset ? matchedPreset.placeholder : 'Field Value'}" />
-      </div>
-      <button type="button" class="btn-del-custom" style="background: none; border: none; color: var(--error); cursor: pointer; padding: 4px; font-size: 13px;">✕</button>
-    </div>
-  `;
-}
-
-function bindCustomFieldRows(container) {
-  container.querySelectorAll('.custom-field-row').forEach(row => bindCustomRowEvents(row));
-}
-
-function bindCustomRowEvents(row) {
-  const typeSelect = row.querySelector('.custom-type-select');
-  const keyInput = row.querySelector('.custom-key');
-  const valInput = row.querySelector('.custom-val');
-  const delBtn = row.querySelector('.btn-del-custom');
-
-  if (typeSelect) {
-    typeSelect.addEventListener('change', () => {
-      const selectedKey = typeSelect.value;
-      const preset = FIELD_PRESETS.find(p => p.key === selectedKey);
-      if (preset && preset.key) {
-        keyInput.value = preset.key;
-        valInput.placeholder = preset.placeholder;
-        valInput.focus();
-      } else {
-        keyInput.value = '';
-        keyInput.placeholder = 'Custom Field Name';
-        valInput.placeholder = 'Field Value';
-        keyInput.focus();
+        github: document.getElementById('l-github').value.trim()
       }
     });
-  }
 
-  if (delBtn) {
-    delBtn.addEventListener('click', () => row.remove());
-  }
+    const updatedMemory = {
+      ...memory,
+      profile: updatedProfile,
+      rememberedAnswers: newSavedAnswers
+    };
+
+    await saveUserMemory(updatedMemory);
+    toast.className = 'toast success';
+    toast.textContent = '✓ Information Saved';
+    setTimeout(() => toast.textContent = '', 2500);
+
+    if (onProfileUpdated) onProfileUpdated(updatedProfile);
+  });
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function escapeVal(val) {

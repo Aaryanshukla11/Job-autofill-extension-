@@ -1,212 +1,232 @@
 /**
- * Minimal & Editorial Resume View Component
- * Workflow: Upload -> Analyze Resume -> Preview Extracted Fields -> Save to Profile
+ * Human-Centered "Build Your Profile" Component
+ * Clear 2-path onboarding: Upload Resume (PDF/DOCX) or Import JSON.
  */
 
 import { buildProfileFromResumeFile } from '../../resume/profile-builder.js';
-import { saveCandidateProfile } from '../../storage/storage.js';
+import { saveUserMemory, getUserMemory, importUserMemoryJSON } from '../../memory/memory-store.js';
 
 export function renderResumeView(container, { candidateProfile, onProfileUpdated, onNavigateToProfile }) {
   const currentResumeName = candidateProfile.documents?.resumeFileName || '';
-  const rawText = candidateProfile.documents?.rawResumeText || '';
-  const cleanedText = sanitizeDisplayRawText(rawText);
-
-  let pendingParsedProfile = null;
 
   container.innerHTML = `
     <div class="section">
-      <div class="section-title">Resume</div>
-      <h2 class="section-heading">Analyze Resume</h2>
-      <p class="section-desc">Upload your PDF or DOCX resume. The extension will analyze it and extract your profile details for review.</p>
+      <div class="section-title">Build Your Profile</div>
+      <h2 class="section-heading">Give us your information</h2>
+      <p class="section-desc">Provide your information once via resume or JSON import. We'll remember it for future job applications.</p>
 
-      <div class="dropzone" id="resume-dropzone">
-        <input type="file" id="resume-file-input" accept=".pdf,.docx,.doc,.txt" hidden />
-        <div class="dropzone-text">Click or drop resume file here to analyze</div>
-        <div class="dropzone-sub">Supports PDF, DOCX, TXT</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px;">
+        <button id="btn-choice-resume" class="btn btn-primary" style="padding: 12px; text-align: center; height: auto;">
+          📄 Upload Resume
+        </button>
+        <button id="btn-choice-json" class="btn btn-secondary" style="padding: 12px; text-align: center; height: auto;">
+          📥 Import JSON
+        </button>
       </div>
-      <div id="resume-status-msg" class="status-msg"></div>
+      <input type="file" id="resume-file-input" accept=".pdf,.docx,.doc,.txt" hidden />
+      <input type="file" id="json-file-input" accept=".json" hidden />
+
+      <div id="build-status-msg" class="status-msg" style="margin-top: 12px;"></div>
     </div>
 
-    <div id="analysis-preview-container" style="display: none;"></div>
+    <div id="build-preview-container" style="display: none;"></div>
 
     ${currentResumeName ? `
       <hr class="divider" />
-
       <div class="section">
-        <div class="section-title">Active Document</div>
-        <div class="panel">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-            <div>
-              <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${escapeHtml(currentResumeName)}</div>
-              <div style="font-size: 11px; color: var(--text-secondary);">Saved in Candidate Profile</div>
-            </div>
-            <button id="btn-remove-resume" class="btn-sm-danger" title="Remove current resume">Remove resume</button>
+        <div class="section-title">Active Resume</div>
+        <div class="panel" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${escapeHtml(currentResumeName)}</div>
+            <div style="font-size: 11px; color: var(--text-secondary);">Saved in your information</div>
           </div>
-          <div style="margin-top: 10px; max-height: 100px; overflow-y: auto; background: var(--bg-main); border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; font-size: 11px; color: var(--text-secondary);">
-            <pre style="white-space: pre-wrap; word-break: break-word; font-family: var(--font-sans);">${escapeHtml(cleanedText.substring(0, 300))}${cleanedText.length > 300 ? '...' : ''}</pre>
-          </div>
+          <button id="btn-remove-resume" class="btn-sm-danger" title="Remove active resume">Remove</button>
         </div>
       </div>
     ` : ''}
   `;
 
-  const dropzone = document.getElementById('resume-dropzone');
-  const fileInput = document.getElementById('resume-file-input');
-  const statusMsg = document.getElementById('resume-status-msg');
-  const previewContainer = document.getElementById('analysis-preview-container');
+  const resumeInput = document.getElementById('resume-file-input');
+  const jsonInput = document.getElementById('json-file-input');
+  const statusMsg = document.getElementById('build-status-msg');
+  const previewContainer = document.getElementById('build-preview-container');
 
-  dropzone.addEventListener('click', () => fileInput.click());
-
-  dropzone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropzone.classList.add('drag-over');
+  document.getElementById('btn-choice-resume').addEventListener('click', () => resumeInput.click());
+  document.getElementById('btn-choice-json').addEventListener('click', () => {
+    jsonInput.value = '';
+    jsonInput.click();
   });
 
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-
-  dropzone.addEventListener('drop', async e => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      await processFile(e.dataTransfer.files[0]);
+  // Handle Resume Upload
+  resumeInput.addEventListener('change', async e => {
+    if (e.target.files && e.target.files[0]) {
+      await processResumeFile(e.target.files[0]);
     }
   });
 
-  fileInput.addEventListener('change', async e => {
+  // Handle JSON Import
+  jsonInput.addEventListener('change', async e => {
     if (e.target.files && e.target.files[0]) {
-      await processFile(e.target.files[0]);
+      await processJsonFile(e.target.files[0]);
     }
   });
 
   const btnRemove = document.getElementById('btn-remove-resume');
   if (btnRemove) {
     btnRemove.addEventListener('click', async () => {
-      const updatedProfile = {
-        ...candidateProfile,
-        documents: {
-          ...candidateProfile.documents,
-          resumeFileName: '',
-          rawResumeText: ''
-        }
-      };
-
-      await saveCandidateProfile(updatedProfile);
-
-      if (onProfileUpdated) onProfileUpdated(updatedProfile);
-      renderResumeView(container, { candidateProfile: updatedProfile, onProfileUpdated, onNavigateToProfile });
+      const memory = await getUserMemory();
+      memory.profile.documents = { resumeFileName: '', rawResumeText: '' };
+      await saveUserMemory(memory);
+      if (onProfileUpdated) onProfileUpdated(memory.profile);
+      renderResumeView(container, { candidateProfile: memory.profile, onProfileUpdated, onNavigateToProfile });
     });
   }
 
-  async function processFile(file) {
+  async function processResumeFile(file) {
     statusMsg.className = 'status-msg info';
     statusMsg.textContent = `Analyzing ${file.name}...`;
     previewContainer.style.display = 'none';
 
     try {
-      // Step 1: Analyze Resume File
-      pendingParsedProfile = await buildProfileFromResumeFile(file, candidateProfile);
-
+      const updatedProfile = await buildProfileFromResumeFile(file, candidateProfile);
       statusMsg.className = 'status-msg success';
-      statusMsg.textContent = `✓ Successfully analyzed ${file.name}. Review extracted details below:`;
-
-      // Step 2: Render Extraction Preview Card
-      renderExtractionPreview(pendingParsedProfile, file.name);
+      statusMsg.textContent = `✓ Successfully analyzed ${file.name}. Review profile details below:`;
+      renderProfilePreviewCard(updatedProfile);
     } catch (err) {
       statusMsg.className = 'status-msg error';
-      statusMsg.textContent = `Error analyzing resume: ${err.message}`;
+      statusMsg.textContent = `Error: ${err.message}`;
     }
   }
 
-  function renderExtractionPreview(parsed, filename) {
-    const p = parsed.personal || {};
-    const c = parsed.contact || {};
-    const prof = parsed.professional || {};
-    const l = parsed.links || {};
+  async function processJsonFile(file) {
+    statusMsg.className = 'status-msg info';
+    statusMsg.textContent = `Reading ${file.name}...`;
+    previewContainer.style.display = 'none';
 
-    const nameStr = p.fullName || `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Not found';
-    const emailStr = c.email || 'Not found';
-    const phoneStr = c.phone || 'Not found';
-    const titleStr = prof.currentTitle || 'Not found';
-    const locationStr = c.address || c.city || 'Not found';
-    const skillsList = (prof.skills || []).join(', ') || 'Not found';
-    const linkedinStr = l.linkedin || 'Not found';
+    try {
+      const text = await file.text();
+      const res = await importUserMemoryJSON(text, 'merge');
+
+      if (res.conflicts && res.conflicts.length > 0) {
+        renderConflictResolutionCard(res.conflicts, res.memory.profile);
+      } else {
+        statusMsg.className = 'status-msg success';
+        statusMsg.textContent = `✓ Successfully imported information from ${file.name}.`;
+        renderProfilePreviewCard(res.memory.profile);
+      }
+    } catch (err) {
+      statusMsg.className = 'status-msg error';
+      statusMsg.textContent = `Import error: ${err.message}`;
+    }
+  }
+
+  function renderProfilePreviewCard(profile) {
+    const p = profile.personal || {};
+    const c = profile.contact || {};
+    const prof = profile.professional || {};
 
     previewContainer.style.display = 'block';
     previewContainer.innerHTML = `
       <hr class="divider" />
       <div class="section">
-        <div class="section-title">Analysis Results</div>
-        <h3 style="font-family: var(--font-serif); font-size: 15px; margin-bottom: 8px; color: var(--text-primary);">Extracted Profile Details</h3>
-        
-        <div class="panel" style="border-left: 3px solid var(--primary-accent);">
+        <div class="section-title">Profile Preview</div>
+        <div class="panel" style="border-left: 3px solid var(--primary-accent); margin-top: 8px;">
           <div class="status-row">
-            <span class="status-label">Candidate Name</span>
-            <span class="status-val">${escapeHtml(nameStr)}</span>
+            <span class="status-label">Name</span>
+            <span class="status-val">${escapeHtml(p.fullName || `${p.firstName} ${p.lastName}`.trim() || 'Not set')}</span>
           </div>
           <div class="status-row">
             <span class="status-label">Email</span>
-            <span class="status-val">${escapeHtml(emailStr)}</span>
+            <span class="status-val">${escapeHtml(c.email || 'Not set')}</span>
           </div>
           <div class="status-row">
-            <span class="status-label">Phone</span>
-            <span class="status-val">${escapeHtml(phoneStr)}</span>
+            <span class="status-label">Title</span>
+            <span class="status-val">${escapeHtml(prof.currentTitle || 'Not set')}</span>
           </div>
           <div class="status-row">
-            <span class="status-label">Current Title</span>
-            <span class="status-val">${escapeHtml(titleStr)}</span>
+            <span class="status-label">Company</span>
+            <span class="status-val">${escapeHtml(prof.currentCompany || 'Not set')}</span>
           </div>
-          <div class="status-row">
-            <span class="status-label">Location</span>
-            <span class="status-val">${escapeHtml(locationStr)}</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">LinkedIn</span>
-            <span class="status-val" style="font-size: 11px;">${escapeHtml(linkedinStr)}</span>
-          </div>
-          <div style="padding-top: 8px;">
-            <div class="status-label" style="margin-bottom: 4px;">Extracted Skills (${(prof.skills || []).length})</div>
-            <div style="font-size: 11px; color: var(--text-primary); line-height: 1.4;">${escapeHtml(skillsList)}</div>
+          <div style="margin-top: 6px; font-size: 11px; color: var(--text-secondary);">
+            <strong>Skills:</strong> ${(prof.skills || []).slice(0, 10).join(', ')}
           </div>
         </div>
 
         <div style="display: flex; gap: 8px; margin-top: 14px;">
-          <button id="btn-save-analyzed-profile" class="btn btn-primary" style="flex: 2;">
-            Save to Profile &rarr;
+          <button id="btn-save-built-profile" class="btn btn-primary" style="flex: 2;">
+            Save & View Profile &rarr;
           </button>
-          <button id="btn-cancel-analyzed-profile" class="btn btn-secondary" style="flex: 1;">
+          <button id="btn-cancel-built-profile" class="btn btn-secondary" style="flex: 1;">
             Cancel
           </button>
         </div>
       </div>
     `;
 
-    // Step 3: Save to Candidate Profile Action
-    document.getElementById('btn-save-analyzed-profile').addEventListener('click', async () => {
-      if (pendingParsedProfile) {
-        await saveCandidateProfile(pendingParsedProfile);
-        if (onProfileUpdated) onProfileUpdated(pendingParsedProfile);
-        if (onNavigateToProfile) onNavigateToProfile();
-      }
+    document.getElementById('btn-save-built-profile').addEventListener('click', async () => {
+      const memory = await getUserMemory();
+      memory.profile = profile;
+      await saveUserMemory(memory);
+      if (onProfileUpdated) onProfileUpdated(profile);
+      if (onNavigateToProfile) onNavigateToProfile();
     });
 
-    document.getElementById('btn-cancel-analyzed-profile').addEventListener('click', () => {
+    document.getElementById('btn-cancel-built-profile').addEventListener('click', () => {
       previewContainer.style.display = 'none';
       statusMsg.className = 'status-msg info';
-      statusMsg.textContent = 'Analysis cancelled.';
+      statusMsg.textContent = 'Cancelled.';
+    });
+  }
+
+  function renderConflictResolutionCard(conflicts, importedProfile) {
+    previewContainer.style.display = 'block';
+    previewContainer.innerHTML = `
+      <hr class="divider" />
+      <div class="section">
+        <div class="section-title">Conflicting Details</div>
+        <p class="section-desc">Some imported values differ from your existing profile. Choose which to keep:</p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+          ${conflicts.map((conf, idx) => `
+            <div class="panel" style="font-size: 11px;">
+              <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${escapeHtml(conf.label)}</div>
+              <div style="display: flex; gap: 8px;">
+                <label style="flex: 1;">
+                  <input type="radio" name="conflict-${idx}" value="existing" checked />
+                  Keep existing: <strong>"${escapeHtml(conf.existingValue)}"</strong>
+                </label>
+                <label style="flex: 1;">
+                  <input type="radio" name="conflict-${idx}" value="imported" />
+                  Use imported: <strong>"${escapeHtml(conf.importedValue)}"</strong>
+                </label>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <button id="btn-resolve-conflicts" class="btn btn-primary" style="margin-top: 14px;">
+          Apply Choices & Save
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btn-resolve-conflicts').addEventListener('click', async () => {
+      const memory = await getUserMemory();
+      conflicts.forEach((conf, idx) => {
+        const choice = previewContainer.querySelector(`input[name="conflict-${idx}"]:checked`).value;
+        if (choice === 'imported') {
+          const parts = conf.field.split('.');
+          memory.profile[parts[0]][parts[1]] = conf.importedValue;
+        }
+      });
+
+      await saveUserMemory(memory);
+      if (onProfileUpdated) onProfileUpdated(memory.profile);
+      if (onNavigateToProfile) onNavigateToProfile();
     });
   }
 }
 
-function sanitizeDisplayRawText(text) {
-  if (!text || typeof text !== 'string') return 'No text extracted.';
-  const clean = text.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/ +/g, ' ').trim();
-  if (clean.length > 10) return clean;
-  return 'Resume loaded successfully.';
-}
-
-function escapeHtml(text) {
-  return String(text || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+function escapeHtml(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

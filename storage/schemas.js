@@ -102,7 +102,7 @@ export const DEFAULT_CANDIDATE_PROFILE = {
 export const DEFAULT_SETTINGS = {
   aiProvider: "Groq",
   groqApiKey: "",
-  aiModel: "llama-3.3-70b-versatile",
+  aiModel: "openai/gpt-oss-120b",
   confidenceThreshold: 0.90, // >=0.90 auto-fill, 0.75-0.89 review, <0.75 skip
   autoGenerateAnswers: true,
   fillSensitiveFields: false, // Default to FALSE for safety
