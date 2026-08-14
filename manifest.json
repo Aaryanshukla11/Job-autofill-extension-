@@ -10,6 +10,11 @@
     "sidePanel",
     "tabs"
   ],
+  "host_permissions": [
+    "file:///*",
+    "http://*/*",
+    "https://*/*"
+  ],
   "action": {
     "default_title": "Open AI Job Autofill",
     "default_icon": {

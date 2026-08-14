@@ -175,7 +175,11 @@ async function handleTriggerAutofill() {
       renderCurrentView();
     }
   } catch (err) {
-    alert('Autofill execution error: ' + err.message);
+    if (err.message && err.message.includes('file:///')) {
+      alert('To autofill local HTML test files (file:///), Chrome requires enabling one setting:\n\n1. Go to chrome://extensions\n2. Click Details on AI Job Autofill\n3. Turn ON "Allow access to file URLs"');
+    } else {
+      alert('Autofill execution error: ' + err.message);
+    }
   }
 }
 

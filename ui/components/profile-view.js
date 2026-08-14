@@ -3,6 +3,7 @@
  */
 
 import { saveCandidateProfile } from '../../storage/storage.js';
+import { sanitizeProfile } from '../../resume/profile-schema.js';
 
 const FIELD_PRESETS = [
   { label: 'Custom Field', key: '', placeholder: 'Field Value' },
@@ -175,6 +176,7 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
   const fileInput = document.getElementById('import-json-file');
   document.getElementById('btn-import-json').addEventListener('click', (e) => {
     e.preventDefault();
+    fileInput.value = '';
     fileInput.click();
   });
 
@@ -183,10 +185,18 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
     if (!file) return;
     try {
       const text = await file.text();
-      const imported = JSON.parse(text);
+      const rawImported = JSON.parse(text);
+      const imported = sanitizeProfile(rawImported);
       await saveCandidateProfile(imported);
       if (onProfileUpdated) onProfileUpdated(imported);
       renderProfileView(container, { candidateProfile: imported, onProfileUpdated });
+
+      const toast = document.getElementById('save-toast');
+      if (toast) {
+        toast.className = 'toast success';
+        toast.textContent = '✓ Profile Loaded from JSON';
+        setTimeout(() => toast.textContent = '', 3000);
+      }
     } catch (err) {
       alert('Failed to import JSON profile: ' + err.message);
     }
@@ -216,7 +226,7 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
       if (k) customFields[k] = v;
     });
 
-    return {
+    return sanitizeProfile({
       ...candidateProfile,
       personal: {
         ...p,
@@ -244,7 +254,7 @@ export function renderProfileView(container, { candidateProfile, onProfileUpdate
         portfolio: document.getElementById('l-portfolio').value.trim()
       },
       customFields
-    };
+    });
   }
 }
 
