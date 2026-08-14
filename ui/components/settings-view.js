@@ -8,15 +8,8 @@ import { exportUserMemoryJSON, importUserMemoryJSON, saveUserMemory } from '../.
 import { createEmptyUserMemory } from '../../memory/memory-schema.js';
 
 export function renderSettingsView(container, { settings, onSettingsUpdated }) {
-  const currentModel = settings.aiModel || 'openai/gpt-oss-120b';
-  const standardModels = [
-    'openai/gpt-oss-120b',
-    'llama-3.3-70b-versatile',
-    'llama-3.1-8b-instant',
-    'mixtral-8x7b-32768',
-    'gemma2-9b-it',
-    'deepseek-r1-distill-llama-70b'
-  ];
+  const currentModel = settings.aiModel || 'models/gemini-3.7-flash';
+  const standardModels = ['models/gemini-3.7-flash'];
   const isCustomModel = !standardModels.includes(currentModel);
 
   container.innerHTML = `
@@ -30,26 +23,21 @@ export function renderSettingsView(container, { settings, onSettingsUpdated }) {
         <div class="form-row">
           <div class="form-col">
             <label>Provider</label>
-            <input type="text" value="Groq Cloud API" disabled />
+            <input type="text" value="Google Gemini" disabled />
           </div>
         </div>
         <div class="form-row">
           <div class="form-col">
-            <label>Groq API Key</label>
-            <input type="password" id="s-groqKey" value="${escapeVal(settings.groqApiKey)}" placeholder="gsk_..." />
+            <label>Google AI API Key</label>
+            <input type="password" id="s-geminiKey" value="${escapeVal(settings.geminiApiKey)}" placeholder="AIza..." />
           </div>
         </div>
-        
+
         <div class="form-row">
           <div class="form-col">
             <label>AI Model</label>
             <select id="s-aiModel">
-              <option value="openai/gpt-oss-120b" ${currentModel === 'openai/gpt-oss-120b' ? 'selected' : ''}>openai/gpt-oss-120b (Default)</option>
-              <option value="llama-3.3-70b-versatile" ${currentModel === 'llama-3.3-70b-versatile' ? 'selected' : ''}>llama-3.3-70b-versatile (Fallback)</option>
-              <option value="llama-3.1-8b-instant" ${currentModel === 'llama-3.1-8b-instant' ? 'selected' : ''}>llama-3.1-8b-instant</option>
-              <option value="mixtral-8x7b-32768" ${currentModel === 'mixtral-8x7b-32768' ? 'selected' : ''}>mixtral-8x7b-32768</option>
-              <option value="gemma2-9b-it" ${currentModel === 'gemma2-9b-it' ? 'selected' : ''}>gemma2-9b-it</option>
-              <option value="deepseek-r1-distill-llama-70b" ${currentModel === 'deepseek-r1-distill-llama-70b' ? 'selected' : ''}>deepseek-r1-distill-llama-70b</option>
+              <option value="models/gemini-3.7-flash" ${currentModel === 'models/gemini-3.7-flash' ? 'selected' : ''}>gemini-3.7-flash</option>
               <option value="custom" ${isCustomModel ? 'selected' : ''}>+ Add Custom Model String...</option>
             </select>
           </div>
@@ -78,6 +66,10 @@ export function renderSettingsView(container, { settings, onSettingsUpdated }) {
             Save Settings
           </button>
           <div id="settings-toast" class="toast"></div>
+          <div id="connection-indicator" class="conn-indicator conn-indicator--idle">
+            <span class="conn-indicator__dot"></span>
+            <span class="conn-indicator__text">Not tested yet — save settings to verify connection</span>
+          </div>
         </div>
       </form>
 
@@ -160,18 +152,52 @@ export function renderSettingsView(container, { settings, onSettingsUpdated }) {
   // Save Settings
   const form = document.getElementById('settings-form');
   const toast = document.getElementById('settings-toast');
+  const indicator = document.getElementById('connection-indicator');
+
+  function setIndicator(state, text) {
+    indicator.className = `conn-indicator conn-indicator--${state}`;
+    indicator.querySelector('.conn-indicator__text').textContent = text;
+  }
+
+  async function testConnection(apiKey, model) {
+    setIndicator('testing', 'Testing connection…');
+    const t0 = Date.now();
+    return new Promise(resolve => {
+      chrome.runtime.sendMessage({
+        type: 'GROQ_FETCH',
+        apiKey,
+        model,
+        systemPrompt: 'You are a test assistant. Reply with valid JSON only.',
+        userPrompt: 'Reply with exactly: {"ok":true}',
+        maxTokens: 16
+      }, res => {
+        const ms = Date.now() - t0;
+        if (chrome.runtime.lastError) {
+          setIndicator('error', `Extension error: ${chrome.runtime.lastError.message}`);
+        } else if (res && res.ok) {
+          const usedModel = res.modelUsed || model;
+          setIndicator('success', `Connected · ${usedModel} · ${ms}ms`);
+        } else {
+          const errMsg = (res && res.error) ? res.error : 'Unknown error';
+          setIndicator('error', `Failed: ${errMsg}`);
+        }
+        resolve();
+      });
+    });
+  }
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
 
     let chosenModel = modelSelect.value;
     if (chosenModel === 'custom') {
-      chosenModel = customModelInput.value.trim() || 'openai/gpt-oss-120b';
+      chosenModel = customModelInput.value.trim() || 'models/gemini-3.7-flash';
     }
 
+    const apiKey = document.getElementById('s-geminiKey').value.trim();
     const updated = {
       ...settings,
-      groqApiKey: document.getElementById('s-groqKey').value.trim(),
+      geminiApiKey: apiKey,
       aiModel: chosenModel,
       fillSensitiveFields: document.getElementById('s-fillSensitiveFields').checked,
       autoGenerateAnswers: document.getElementById('s-autoGenerateAnswers').checked
@@ -179,10 +205,16 @@ export function renderSettingsView(container, { settings, onSettingsUpdated }) {
 
     await saveSettings(updated);
     toast.className = 'toast success';
-    toast.textContent = `✓ Settings Saved (Model: ${chosenModel})`;
+    toast.textContent = `✓ Settings Saved`;
     setTimeout(() => toast.textContent = '', 2500);
 
     if (onSettingsUpdated) onSettingsUpdated(updated);
+
+    if (!apiKey) {
+      setIndicator('error', 'No API key provided — enter your Groq API key above');
+      return;
+    }
+    await testConnection(apiKey, chosenModel);
   });
 }
 

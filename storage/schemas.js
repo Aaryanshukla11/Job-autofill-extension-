@@ -100,9 +100,9 @@ export const DEFAULT_CANDIDATE_PROFILE = {
 };
 
 export const DEFAULT_SETTINGS = {
-  aiProvider: "Groq",
-  groqApiKey: "",
-  aiModel: "openai/gpt-oss-120b",
+  aiProvider: "Gemini",
+  geminiApiKey: "",
+  aiModel: "models/gemini-3.7-flash",
   confidenceThreshold: 0.90, // >=0.90 auto-fill, 0.75-0.89 review, <0.75 skip
   autoGenerateAnswers: true,
   fillSensitiveFields: false, // Default to FALSE for safety

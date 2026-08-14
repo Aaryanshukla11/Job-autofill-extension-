@@ -442,3 +442,84 @@ body {
 .btn-highlight-sm:hover {
   border-color: var(--text-secondary);
 }
+
+/* Connection Indicator */
+.conn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.conn-indicator__dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: background 0.2s ease;
+}
+
+.conn-indicator__text {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  transition: color 0.2s ease;
+}
+
+/* Idle */
+.conn-indicator--idle {
+  border-color: var(--border-color);
+}
+.conn-indicator--idle .conn-indicator__dot {
+  background: var(--text-secondary);
+  opacity: 0.4;
+}
+
+/* Testing */
+.conn-indicator--testing {
+  border-color: var(--warning);
+  background: rgba(164, 124, 50, 0.06);
+}
+.conn-indicator--testing .conn-indicator__dot {
+  background: var(--warning);
+  animation: conn-pulse 0.9s ease-in-out infinite;
+}
+.conn-indicator--testing .conn-indicator__text {
+  color: var(--warning);
+}
+
+/* Success */
+.conn-indicator--success {
+  border-color: var(--success);
+  background: var(--accent-soft);
+}
+.conn-indicator--success .conn-indicator__dot {
+  background: var(--success);
+}
+.conn-indicator--success .conn-indicator__text {
+  color: var(--success);
+}
+
+/* Error */
+.conn-indicator--error {
+  border-color: var(--error);
+  background: rgba(164, 74, 67, 0.06);
+}
+.conn-indicator--error .conn-indicator__dot {
+  background: var(--error);
+}
+.conn-indicator--error .conn-indicator__text {
+  color: var(--error);
+}
+
+@keyframes conn-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(0.7); }
+}

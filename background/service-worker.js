@@ -3,7 +3,7 @@
  * Handles side panel opening, isolated AI requests, content script injection, and message routing.
  */
 
-import { callGroqApi } from '../ai/groq-provider.js';
+import { callGeminiApi } from '../ai/gemini-provider.js';
 import { getSettings } from '../storage/storage.js';
 
 // Open side panel when extension action icon is clicked
@@ -41,13 +41,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'GROQ_FETCH') {
     (async () => {
       const settings = await getSettings();
-      const apiKey = msg.apiKey || settings.groqApiKey;
-      const model = msg.model || settings.aiModel || 'llama-3.3-70b-versatile';
-      
-      const result = await callGroqApi({
+      const apiKey = msg.apiKey || settings.geminiApiKey;
+      const model  = msg.model  || settings.aiModel || 'models/gemini-3.7-flash';
+
+      const result = await callGeminiApi({
         apiKey,
         systemPrompt: msg.systemPrompt,
-        userPrompt: msg.userPrompt,
+        userPrompt:   msg.userPrompt,
         model,
         maxTokens: msg.maxTokens || 1000
       });
@@ -55,6 +55,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })();
     return true; // Async response
   }
+
 
   if (msg.type === 'HIGHLIGHT_FIELD') {
     // Forward highlight request to active tab content script
